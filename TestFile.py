@@ -1,5 +1,6 @@
 import pandas as pd
 import quandl
+quandl.ApiConfig.api_key = "H1T2ddaL3XRzU4afn4vZ"
 import datetime
 
 # We will look at stock prices over the past year, starting at January 1, 2016
