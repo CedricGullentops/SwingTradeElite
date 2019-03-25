@@ -24,7 +24,17 @@ df['AverageTrueRange'] = np.nan
 
 print df.head(5)
 
-for i in range(13, df.shape[0]):
-    df['AverageTrueRange'][i] = 10
+average = 0
+for i in range(df.shape[0]):
+    if i < 14:
+        df['AverageTrueRange'] = 0
+        average += df['AverageTrueRange'][i]
+        if i == 13:
+            average / 14
+            df['AverageTrueRange'][i] = average
+    #elif i >= 14:
+
+
+df['AverageTrueRange'] =
 
 print df.head(40)
