@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 import pandas as pd
 import pandas_datareader.data as web
+import numpy as  np
 
 style.use('ggplot')
 
@@ -18,10 +19,12 @@ df = pd.read_csv('tsla.csv', parse_dates=['Date'], index_col=0)
 #df['Close'].plot(figsize=(16, 12))
 #plt.show()
 
-#df = df.drop(['DATE'], 1)
+df['TrueRange'] = df['High']-df['Low']
+df['AverageTrueRange'] = np.nan
 
-#print df.shape[0] #rows
-#print df.shape[1] #cols
+print df.head(5)
 
-#print df.head(1)
+for i in range(13, df.shape[0]):
+    df['AverageTrueRange'][i] = 10
 
+print df.head(40)
