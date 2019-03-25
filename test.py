@@ -12,19 +12,16 @@ end = dt.datetime(2019,3,25)
 #df = web.DataReader('TSLA','yahoo', start, end)
 #df.to_csv('tsla.csv')
 
-df = pd.read_csv('tsla.csv', parse_dates=True, index_col=0)
+df = pd.read_csv('tsla.csv', parse_dates=['Date'], index_col=0)
+#print df.dtypes #show types: High, Low, Open, Close, Volume, Adj Close
 
-dfnew = df['Adj Close']
-print dfnew
-
-#df['Adj Close'].plot()
+#df['Close'].plot(figsize=(16, 12))
 #plt.show()
 
 #df = df.drop(['DATE'], 1)
 
-print df.shape[0] #rows
-print df.shape[1] #cols
+#print df.shape[0] #rows
+#print df.shape[1] #cols
 
-#print df.values #only values
+#print df.head(1)
 
-print df.head(1)
