@@ -1,9 +1,13 @@
+from __future__ import division
 import datetime as dt
 import matplotlib.pyplot as plt
 from matplotlib import style
 import pandas as pd
 import pandas_datareader.data as web
 import numpy as  np
+
+
+pd.options.mode.chained_assignment = None  # default='warn'   = turning off warning!!!
 
 style.use('ggplot')
 
@@ -24,17 +28,18 @@ df['AverageTrueRange'] = np.nan
 
 print df.head(5)
 
-average = 0
+average = 0.0
 for i in range(df.shape[0]):
     if i < 14:
         df['AverageTrueRange'] = 0
-        average += df['AverageTrueRange'][i]
+        average += float(df['TrueRange'][i])
         if i == 13:
-            average / 14
+            average = float(average / 14)
             df['AverageTrueRange'][i] = average
     #elif i >= 14:
 
 
-df['AverageTrueRange'] =
+#TODO calculate ADX @ https://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:average_directional_index_adx
+#TODO @ https://www.youtube.com/watch?v=LKDJQLrXedg
 
 print df.head(40)
