@@ -41,12 +41,24 @@ def comparedata(dfplot, column, column2):
     plt.show()
 
 
+def compare3data(dfplot, column, column2, column3):
+    # Create and show a plot
+    dfplot.plot(y=[column, column2, column3], figsize=(16, 12))
+    plt.show()
+
+
+def compare4data(dfplot, column, column2, column3, column4):
+    # Create and show a plot
+    dfplot.plot(y=[column, column2, column3, column4], figsize=(16, 12))
+    plt.show()
+
+
 # Start and end date - 6 months
 start = dt.datetime(2018, 3, 23)
 end = dt.datetime(2019, 3, 25)
 
 # downloaddata(start, end, 'SNPS')
-downloaddata(start, end, 'TSLA')
+# downloaddata(start, end, 'TSLA')
 df = readdata()
 
 # Create new columns
@@ -65,7 +77,7 @@ df['ADX'] = np.nan
 df['EMA12'] = np.nan
 df['EMA26'] = np.nan
 df['MACD'] = np.nan
-df['MACDsignal'] = np.nan
+df['MACDsmooth'] = np.nan
 
 average = 0.0
 smoothplusaverage = 0.0
@@ -73,7 +85,7 @@ smoothminaverage = 0.0
 adxaverage = 0.0
 emamaverage = 0.0
 emalaverage = 0.0
-macdsignalaverage = 0.0
+MACDsmoothaverage = 0.0
 
 print("Making calculations.")
 for i in range(df.shape[0]):
@@ -177,23 +189,22 @@ for i in range(df.shape[0]):
 
     # Calculate MACD signal
     if i < MACDL:
-        df['MACDsignal'][i] = 0.0
+        df['MACDsmooth'][i] = 0.0
     elif i < MACDL + MACDS:
-        df['MACDsignal'][i] = 0.0
-        macdsignalaverage += df['MACD'][i]
+        df['MACDsmooth'][i] = 0.0
+        MACDsmoothaverage += df['MACD'][i]
         if i == MACDL + MACDS - 1:
-            df['MACDsignal'][i] = macdsignalaverage / MACDS
+            df['MACDsmooth'][i] = MACDsmoothaverage / MACDS
     elif i >= MACDL + MACDS:
-        df['MACDsignal'][i] = df['MACD'][i] * 2 / (MACDS + 1) + df['MACDsignal'][i-1] * (1 - (2 / (MACDS + 1)))
+        df['MACDsmooth'][i] = df['MACD'][i] * 2 / (MACDS + 1) + df['MACDsmooth'][i-1] * (1 - (2 / (MACDS + 1)))
 
 # Delete the top SMALLPERIOD * 2 + 1 rows
 print("Removing top", 40, "rows")
 df = df.iloc[int(SMALLPERIOD * 3 + 1):]
 print(df.head(40))
 
+plotdata(df, 'Close')
 plotdata(df, 'ADX')
 comparedata(df, '+DMI', '-DMI')
-plotdata(df, 'Close')
 comparedata(df, 'EMA12', 'EMA26')
-plotdata(df, 'MACD')
-plotdata(df, 'MACDsignal')
+comparedata(df, 'MACD', 'MACDsmooth')
