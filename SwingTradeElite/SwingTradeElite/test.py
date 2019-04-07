@@ -198,17 +198,161 @@ def calculateIndicators(df):
     return df
 
 
+def isTrending(dataframe):
+    dataframe['IsTrending'] = np.nan
+    for i in range(dataframe.shape[0]):
+        if dataframe['ADX'][i] <= 20:
+            dataframe['IsTrending'][i] = 0
+        elif dataframe['ADX'][i] > 30:
+            dataframe['IsTrending'][i] = 1
+        else:
+            if (dataframe['ADX'][i] - dataframe['ADX'][i-9]) > 0 and (dataframe['ADX'][i] - dataframe['ADX'][i-3]) > 0:
+                dataframe['IsTrending'][i] = 1
+            else:
+                dataframe['IsTrending'][i] = 0
+    return dataframe
+
+
+def isPositiveTrend(dataframe):
+    dataframe['IsPositiveTrend'] = np.nan
+    for i in range(dataframe.shape[0]):
+        if dataframe['IsTrending'][i] == 0:
+            dataframe['IsPositiveTrend'][i] = 0
+        elif (dataframe['+DMI'][i]- dataframe['-DMI'][i]) > 0:
+            dataframe['IsPositiveTrend'][i] = 1
+        else:
+            dataframe['IsPositiveTrend'][i] = 0
+    return dataframe
+
+
+def isNegativeTrend(dataframe):
+    dataframe['isNegativeTrend'] = np.nan
+    for i in range(dataframe.shape[0]):
+        if dataframe['IsTrending'][i] == 0:
+            dataframe['isNegativeTrend'][i] = 0
+        elif (dataframe['+DMI'][i]- dataframe['-DMI'][i]) < 0:
+            dataframe['isNegativeTrend'][i] = 1
+        else:
+            dataframe['isNegativeTrend'][i] = 0
+    return dataframe
+
+
+def isMACDlarger(dataframe):
+    dataframe['MACDlarger'] = np.nan
+    for i in range(dataframe.shape[0]):
+        if dataframe['MACD'][i] > dataframe['MACDsmooth'][i]:
+            dataframe['MACDlarger'][i] = 1
+        else:
+            dataframe['MACDlarger'][i] = 0
+    return dataframe
+
+
+def isPositiveMACDCrossover(dataframe):
+    dataframe['PosCrossover'] = np.nan
+    for i in range(dataframe.shape[0]):
+        if i != 0 and dataframe['MACD'][i] > dataframe['MACDsmooth'][i] and dataframe['MACD'][i-1] <= dataframe['MACDsmooth'][i-1]:
+            dataframe['PosCrossover'][i] = 1
+        else:
+            dataframe['PosCrossover'][i] = 0
+    return dataframe
+
+
+def isNegativeMACDCrossover(dataframe):
+    dataframe['NegCrossover'] = np.nan
+    for i in range(dataframe.shape[0]):
+        if i != 0 and dataframe['MACD'][i] <= dataframe['MACDsmooth'][i] and dataframe['MACD'][i-1] > dataframe['MACDsmooth'][i-1]:
+            dataframe['NegCrossover'][i] = 1
+        else:
+            dataframe['NegCrossover'][i] = 0
+    return dataframe
+
+
+def setStopLosses(dataframe):
+    dataframe['Stoploss'] = np.nan
+    for i in range(3, dataframe.shape[0]):
+        if dataframe['Close'][i] < dataframe['ADX'][i-1]:
+            dataframe['Stoploss'][i] = dataframe['Stoploss'][i-1]
+        else:
+            if dataframe['ADX'][i] < dataframe['ADX'][i-3]:
+                dataframe['Stoploss'][i] = 0.03 * dataframe['Close'][i]
+            else:
+                if dataframe['Close'][i] - dataframe['Close'][i-2] < 0.05 * dataframe['Close'][i]:
+                    dataframe['Stoploss'][i] = dataframe['Close'][i] - dataframe['Close'][i-2]
+                else:
+                    dataframe['Stoploss'][i] = 0.05 * dataframe['Close'][i]
+    return dataframe
+
+
+def calulatePotentialProfits(dataframe):
+    buy = []
+    sell = []
+    profit = []
+    for i in range(dataframe.shape[0]):
+        if dataframe['IsPositiveTrend'][i] == 1 and dataframe['MACDlarger'][i] == 1 and len(sell) == len(buy):
+            buy.append(dataframe['Close'][i])
+        if dataframe['Stoploss'][i] > dataframe['Close'][i] and len(buy) > len(sell):
+            sell.append(dataframe['Close'][i])
+        elif dataframe['NegCrossover'][i] == 1 and len(buy) > len(sell):
+            sell.append(dataframe['Close'][i])
+    for i in range(len(sell)):
+        profit.append(sell[i]-buy[i])
+    print(sell)
+    print(buy)
+    print(profit)
+    return
+
+
+def testProfits(dataframe):
+    buy = []
+    sell = []
+    profit = []
+    for i in range(dataframe.shape[0]):
+        if dataframe['PosCrossover'][i] == 1 and len(sell) == len(buy):
+            buy.append(dataframe['Close'][i])
+        if dataframe['Stoploss'][i] > dataframe['Close'][i] and len(buy) > len(sell):
+            sell.append(dataframe['Close'][i])
+        elif dataframe['NegCrossover'][i] == 1 and len(buy) > len(sell):
+            sell.append(dataframe['Close'][i])
+    for i in range(len(sell)):
+        profit.append(sell[i]-buy[i])
+    print(sell)
+    print(buy)
+    print(profit)
+    return
+
+
 # Start and end date - 6 months
 start = dt.datetime(2018, 3, 23)
 end = dt.datetime(2019, 3, 25)
 
 # downloaddata(start, end, 'SNPS')
-# downloaddata(start, end, 'TSLA')
+downloaddata(start, end, 'SNPS')
 df = readdata()
 df = calculateIndicators(df)
+df = isTrending(df)
 
-plotdata(df, 'Close')
-plotdata(df, 'ADX')
-comparedata(df, '+DMI', '-DMI')
-comparedata(df, 'EMA12', 'EMA26')
-comparedata(df, 'MACD', 'MACDsmooth')
+# buy values
+df = isPositiveTrend(df)
+df = isMACDlarger(df)
+
+# sell values
+df = isNegativeMACDCrossover(df)
+
+df = isPositiveMACDCrossover(df)
+
+df = setStopLosses(df)
+
+print("The way it's meant to be")
+calulatePotentialProfits(df)
+
+print("Purely positive crossover")
+testProfits(df)
+
+# fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 4))  # 1 row, 2 columns
+# df.plot(y=['MACD', 'MACDsmooth', 'IsPositiveTrend'], ax=ax1)
+# df.plot(y=['Close'], ax=ax2)
+# df.plot(y=['MACDlarger'], ax=ax3)
+# plt.tight_layout()
+# plt.show()
+
+
