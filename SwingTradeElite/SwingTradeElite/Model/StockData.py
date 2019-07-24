@@ -33,8 +33,8 @@ class StockData:
 
         # sell values
         self.dataframe = self.isNegativeMACDCrossover(self.dataframe)
-        self.dataframe = self.isPositiveMACDCrossover(self.dataframe)
-        self.dataframe = self.setStopLosses(self.dataframe)
+        #self.dataframe = self.isPositiveMACDCrossover(self.dataframe)
+        #self.dataframe = self.setStopLosses(self.dataframe)
 
     def downloaddata(self, startdate, enddate):
         # Read data from yahoo and write to file
@@ -47,23 +47,166 @@ class StockData:
         self.dataframe = pd.read_csv('download.csv', parse_dates=['Date'], index_col=0)
         return
 
-    def plotdata(self, column):
+    def plotdata(self, column, scale):
         # Create and show a plot
-        self.dataframe.plot(y=[column], figsize=(16, 12))
+        if scale:
+            self.dataframe['Temporary'] = self.dataframe[column]
+            sum = 0
+            for i in range(self.dataframe.shape[0]):
+               sum += self.dataframe[column][i]
+            sum /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column][i]-sum
+            self.dataframe.plot(y=['Temporary'], figsize=(16, 12))
+        else:
+            self.dataframe.plot(y=[column], figsize=(16, 12))
         plt.show()
 
-    def comparedata(self, column, column2):
+    def comparedata(self, column, scale, column2, scale2):
         # Create and show a plot
-        self.dataframe.plot(y=[column, column2], figsize=(16, 12))
+        if scale and not scale2:
+            self.dataframe['Temporary'] = self.dataframe[column]
+            sum = 0
+            for i in range(self.dataframe.shape[0]):
+                sum += self.dataframe[column][i]
+            sum /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column][i] - sum
+            self.dataframe.plot(y=['Temporary', column2], figsize=(16, 12))
+
+        elif scale2 and not scale:
+            self.dataframe['Temporary'] = self.dataframe[column]
+            sum = 0
+            for i in range(self.dataframe.shape[0]):
+                sum += self.dataframe[column2][i]
+            sum /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column2][i] - sum
+            self.dataframe.plot(y=[column, 'Temporary'], figsize=(16, 12))
+
+        elif scale and scale2:
+            self.dataframe['Temporary'] = self.dataframe[column]
+            self.dataframe['Temporary2'] = self.dataframe[column2]
+            sum = 0
+            sum2 = 0
+            for i in range(self.dataframe.shape[0]):
+                sum += self.dataframe[column][i]
+                sum2 += self.dataframe[column2][i]
+            sum /= self.dataframe.shape[0]
+            sum2 /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column][i] - sum
+                self.dataframe['Temporary2'][i] = self.dataframe[column2][i] - sum2
+            self.dataframe.plot(y=['Temporary', 'Temporary2'], figsize=(16, 12))
+
+        else:
+            self.dataframe.plot(y=[column, column2], figsize=(16, 12))
         plt.show()
 
-    def compare3data(self, column, column2, column3):
+    def compare3data(self, column, scale, column2, scale2, column3, scale3):
         # Create and show a plot
-        self.dataframe.plot(y=[column, column2, column3], figsize=(16, 12))
+        if scale and not scale2 and not scale3:
+            self.dataframe['Temporary'] = self.dataframe[column]
+            sum = 0
+            for i in range(self.dataframe.shape[0]):
+                sum += self.dataframe[column][i]
+            sum /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column][i] - sum
+            self.dataframe.plot(y=['Temporary', column2, column3], figsize=(16, 12))
+
+        elif scale2 and not scale and not scale3:
+            self.dataframe['Temporary'] = self.dataframe[column]
+            sum = 0
+            for i in range(self.dataframe.shape[0]):
+                sum += self.dataframe[column2][i]
+            sum /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column2][i] - sum
+            self.dataframe.plot(y=[column, 'Temporary', column3], figsize=(16, 12))
+
+        elif scale and scale2 and not scale3:
+            self.dataframe['Temporary'] = self.dataframe[column]
+            self.dataframe['Temporary2'] = self.dataframe[column2]
+            sum = 0
+            sum2 = 0
+            for i in range(self.dataframe.shape[0]):
+                sum += self.dataframe[column][i]
+                sum2 += self.dataframe[column2][i]
+            sum /= self.dataframe.shape[0]
+            sum2 /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column][i] - sum
+                self.dataframe['Temporary2'][i] = self.dataframe[column2][i] - sum2
+            self.dataframe.plot(y=['Temporary', 'Temporary2', column3], figsize=(16, 12))
+
+        elif scale and not scale2 and scale3:
+            self.dataframe['Temporary'] = self.dataframe[column]
+            self.dataframe['Temporary2'] = self.dataframe[column]
+            sum = 0
+            sum2 = 0
+            for i in range(self.dataframe.shape[0]):
+                sum += self.dataframe[column][i]
+                sum2 += self.dataframe[column3][i]
+            sum /= self.dataframe.shape[0]
+            sum2 /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column][i] - sum
+                self.dataframe['Temporary2'][i] = self.dataframe[column3][i] - sum2
+            self.dataframe.plot(y=['Temporary', column2, 'Temporary2'], figsize=(16, 12))
+
+        elif scale2 and not scale and scale3:
+            self.dataframe['Temporary'] = self.dataframe[column]
+            self.dataframe['Temporary2'] = self.dataframe[column]
+            sum = 0
+            sum2 = 0
+            for i in range(self.dataframe.shape[0]):
+                sum += self.dataframe[column2][i]
+                sum2 += self.dataframe[column3][i]
+            sum /= self.dataframe.shape[0]
+            sum2 /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column2][i] - sum
+                self.dataframe['Temporary2'][i] = self.dataframe[column3][i] - sum2
+            self.dataframe.plot(y=[column, 'Temporary', 'Temporary2'], figsize=(16, 12))
+
+        elif scale and scale2 and scale3:
+            self.dataframe['Temporary'] = self.dataframe[column]
+            self.dataframe['Temporary2'] = self.dataframe[column2]
+            self.dataframe['Temporary3'] = self.dataframe[column3]
+            sum = 0
+            sum2 = 0
+            sum3 = 0
+            for i in range(self.dataframe.shape[0]):
+                sum += self.dataframe[column][i]
+                sum2 += self.dataframe[column2][i]
+                sum3 += self.dataframe[column3][i]
+            sum /= self.dataframe.shape[0]
+            sum2 /= self.dataframe.shape[0]
+            sum3 /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column][i] - sum
+                self.dataframe['Temporary2'][i] = self.dataframe[column2][i] - sum2
+                self.dataframe['Temporary3'][i] = self.dataframe[column3][i] - sum3
+            self.dataframe.plot(y=['Temporary', 'Temporary2', 'Temporary3'], figsize=(16, 12))
+
+        elif not scale and not scale2 and scale3:
+            self.dataframe['Temporary'] = self.dataframe[column3]
+            sum = 0
+            for i in range(self.dataframe.shape[0]):
+                sum += self.dataframe[column3][i]
+            sum /= self.dataframe.shape[0]
+            for i in range(self.dataframe.shape[0]):
+                self.dataframe['Temporary'][i] = self.dataframe[column3][i] - sum
+            self.dataframe.plot(y=[column, column2, 'Temporary'], figsize=(16, 12))
+
+        else:
+            self.dataframe.plot(y=[column, column2, column3], figsize=(16, 12))
         plt.show()
 
     def compare4data(self, column, column2, column3, column4):
         # Create and show a plot
+        # Scaling not implemented because of 16 possible variations
         self.dataframe.plot(y=[column, column2, column3, column4], figsize=(16, 12))
         plt.show()
 
@@ -85,7 +228,7 @@ class StockData:
         df['EMA26'] = np.nan
         df['MACD'] = np.nan
         df['MACDsmooth'] = np.nan
-        df['Stoploss'] = np.nan
+        df['NextWeekPrice'] = np.nan
 
         average = 0.0
         smoothplusaverage = 0.0
@@ -208,8 +351,14 @@ class StockData:
                 df['MACDsmooth'][i] = df['MACD'][i] * 2 / (self.MACDS + 1) + df['MACDsmooth'][i - 1] * (1 - (2 / (self.MACDS + 1)))
 
         # Delete the top SMALLPERIOD * 2 + 1 rows
-        print("Removing top", 40, "rows")
         df = df.iloc[int(self.SMALLPERIOD * 3 + 1):]
+
+        for i in range(df.shape[0]-7):
+            if df['Close'][i+7] > df['Close'][i]:
+                df['NextWeekPrice'][i] = 1
+            else:
+                df['NextWeekPrice'][i] = 0
+        df.drop(df.tail(7).index, inplace=True)
         return df
 
     @staticmethod
@@ -283,6 +432,7 @@ class StockData:
 
     @staticmethod
     def setStopLosses(dataframe):
+        dataframe['Stoploss'] = np.nan
         for i in range(3, dataframe.shape[0]):
             if dataframe['ADX'][i] < dataframe['ADX'][i-1]:
                 dataframe['Stoploss'][i] = dataframe['Stoploss'][i-1]
@@ -298,6 +448,7 @@ class StockData:
 
     @staticmethod
     def setStopLoss(dataframe, i, prevstoploss):
+        dataframe['Stoploss'] = np.nan
         if prevstoploss == 0:
             return 0.98 * dataframe['Close'][i]
         elif dataframe['Close'][i] < dataframe['Open'][i]:
